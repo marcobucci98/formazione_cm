@@ -1,0 +1,28 @@
+#SPDX-License-Identifier: MIT-0
+---
+# vars file for install_docker
+
+# pacchetti da rimuovere
+rm_pack:
+  - podman 
+  - buildah 
+  - runc 
+  - docker 
+  - docker-client 
+  - docker-client-latest 
+  - docker-common 
+  - docker-latest 
+  - docker-latest-logrotate 
+  - docker-logrotate 
+  - docker-engine
+# pacchetti da installare 
+packages:
+  - docker-ce 
+  - docker-ce-cli 
+  - containerd.io 
+  - docker-buildx-plugin 
+  - docker-compose-plugin
+# repo 
+docker_repo: "https://download.docker.com/linux/centos/$releasever/$basearch/stable"
+docker_key: "https://download.docker.com/linux/centos/gpg"
+...

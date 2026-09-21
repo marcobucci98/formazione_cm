@@ -1,0 +1,32 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for docker_daemon
+
+- name: Ensure /etc/docker directory exists
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Configure Docker daemon with insecure registry
+  ansible.builtin.copy:
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      {
+        "insecure-registries": ["{{ registry_host }}:{{ registry_port }}"]
+      }
+  notify: Restart Docker
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers # esecuzione forzata degli handler
+
+- name: Wait for Docker socket
+  ansible.builtin.wait_for:
+    path: /var/run/docker.sock
+    timeout: 30
+...

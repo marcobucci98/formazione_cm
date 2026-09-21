@@ -1,0 +1,7 @@
+#SPDX-License-Identifier: MIT-0
+---
+# vars file for registry
+num_port: "5000"
+container_name: "docker-registry"
+storage_dir: "/var/lib/docker-registry"
+...

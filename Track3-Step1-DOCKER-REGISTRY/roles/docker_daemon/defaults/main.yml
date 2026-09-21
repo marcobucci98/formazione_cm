@@ -1,0 +1,7 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for docker_daemon
+
+registry_host: "192.168.56.11"
+registry_port: 5000
+...

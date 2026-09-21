@@ -1,0 +1,11 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for pull_and_push
+
+registry_host: "192.168.56.11"
+registry_port: 5000
+registry_test_image: "hello-world"
+registry_test_tag: "latest"
+registry_test_local_image: "{{ registry_test_image }}:{{ registry_test_tag }}"
+registry_test_remote_image: "{{ registry_host }}:{{ registry_port }}/{{ registry_test_image }}:{{ registry_test_tag }}"
+...

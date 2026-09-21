@@ -1,0 +1,23 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for docker_registry  
+
+- name: Volume
+  ansible.builtin.file:
+    path: "{{ storage_dir }}"
+    state: directory
+    mode: '0755'
+  
+- name: Start Docker Container
+  community.docker.docker_container:
+    name: "{{ container_name }}"
+    image: registry:2
+    state: started
+    restart_policy: always
+    published_ports:
+      - "{{ num_port }}:5000"
+    env:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry # salvataggio dati container
+    volumes:
+      - "{{ storage_dir }}:/var/lib/registry:z"
+...
