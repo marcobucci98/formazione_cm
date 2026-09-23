@@ -1,0 +1,14 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for images
+image_ubuntu: ubuntu
+image_rocky: rocky
+container_ubuntu: ubuntu
+container_rocky: rocky
+dockerfile_ubuntu: Dockerfile.ubuntu22
+dockerfile_rocky: Dockerfile.rocky9
+port_ubuntu: "2221:22"
+port_rocky: "2222:22"
+registry: "192.168.56.11:5000"
+tag: latest
+...

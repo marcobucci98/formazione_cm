@@ -1,0 +1,94 @@
+# SPDX-License-Identifier: MIT-0
+---
+- name: Build Containers
+  hosts: worker
+  become: true
+  gather_facts: true
+
+  vars:
+    image_ubuntu: ubuntu
+    image_rocky: rocky
+    container_ubuntu: ubuntu
+    container_rocky: rocky
+    dockerfile_ubuntu: Dockerfile.ubuntu22
+    dockerfile_rocky: Dockerfile.rocky9
+    port_ubuntu: "2221:22"
+    port_rocky: "2222:22"
+    tag: latest
+
+  tasks:
+
+    # directory dockerfile
+
+    - name: Dockerfiles-OS
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/Dockerfiles-OS"
+        state: directory
+        mode: '0755'
+
+    # chiave
+
+    - name: SSH Keys
+      community.crypto.openssh_keypair:
+        path: "{{ playbook_dir }}/Dockerfiles-OS/id_rsa"
+        type: rsa
+        size: 4096
+        state: present
+      register: ssh_key_result
+
+    - name: Read Key
+      ansible.builtin.slurp:
+        src: "{{ playbook_dir }}/Dockerfiles-OS/id_rsa.pub"
+      register: pub_key_encoded
+
+    - name: Set Key
+      ansible.builtin.set_fact:
+        pub_key_content: "{{ pub_key_encoded.content | b64decode }}"
+
+    # Build immagine Ubuntu
+
+    - name: Build Ubuntu Image
+      community.docker.docker_image:
+        name: "{{ image_ubuntu }}:{{ tag | default('latest') }}"
+        build:
+          path: "{{ playbook_dir }}/Dockerfiles-OS/ubuntu-OS"
+          dockerfile: "{{ dockerfile_ubuntu }}"
+          args:
+            SSH_PUBLIC_KEY: "{{ pub_key_content }}"
+          pull: true
+        source: build
+
+    # avvia container Ubuntu
+
+    - name: Start Ubuntu Container
+      community.docker.docker_container:
+        name: "{{ container_ubuntu }}"
+        image: "{{ image_ubuntu }}:{{ tag | default('latest') }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "{{ port_ubuntu }}"
+
+    # build immagine Rocky
+
+    - name: Build Rocky Image
+      community.docker.docker_image:
+        name: "{{ image_rocky }}:{{ tag | default('latest') }}"
+        build:
+          path: "{{ playbook_dir }}/Dockerfiles-OS/rocky-OS"
+          dockerfile: "{{ dockerfile_rocky }}"
+          args:
+            SSH_PUBLIC_KEY: "{{ pub_key_content }}"
+          pull: true
+        source: build
+
+    # avvia il container rocky
+
+    - name: Start Rocky Container
+      community.docker.docker_container:
+        name: "{{ container_rocky }}"
+        image: "{{ image_rocky }}:{{ tag | default('latest') }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "{{ port_rocky }}"
