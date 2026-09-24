@@ -15,9 +15,25 @@
     state: started
     restart_policy: always
     published_ports:
-      - "{{ num_port }}:5000"
+      - "{{ registry_port }}:5000"
     env:
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry # salvataggio dati container
     volumes:
       - "{{ storage_dir }}:/var/lib/registry:z"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:{{ registry_port }}/v2/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+- name: Wait for Registry
+  ansible.builtin.uri:
+    url: "http://localhost:{{ registry_port }}/v2/"
+    method: GET
+    status_code: 200
+  register: registry_health
+  until: registry_health.status == 200
+  retries: 10
+  delay: 3
 ...
