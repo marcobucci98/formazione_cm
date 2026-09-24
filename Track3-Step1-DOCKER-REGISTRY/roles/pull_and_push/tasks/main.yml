@@ -2,57 +2,46 @@
 ---
 # tasks file for pull_and_push
 
-# pull hello-world
+#  pull immagine docker hub 
 - name: Pull hello-world from Docker Hub
   community.docker.docker_image:
-    name: "{{ registry_test_local_image }}"
+    name: "{{ registry_test_local_image }}" # es. hello-world:latest
     source: pull
     force_source: true
 
-# tag
-- name: Tag image for local registry
+# tag immagine
+- name: Tag image for registry
   community.docker.docker_image:
     name: "{{ registry_test_local_image }}"
-    repository: "{{ registry_test_remote_image }}"
+    repository: "{{ registry_test_remote_image }}" #
     source: local
     force_tag: true
 
-# push sul registry
-
-- name: Push image to local registry
+# push su registry 
+- name: Push image to registry
   community.docker.docker_image:
     name: "{{ registry_test_remote_image }}"
     source: local
     push: true
 
-
-# verifica dell'immagine sul registry
-
-- name: Query Registry
-  ansible.builtin.uri:
-    url: "http://{{ registry_host }}:{{ registry_port }}/v2/_catalog"
-    method: GET
-    status_code: 200
-    return_content: true
-  register: registry_catalog
-
-- name: Show Registry 
-  ansible.builtin.debug:
-    msg: "Catalogo: {{ (registry_catalog.content | from_json).repositories }}"
-
 - name: Query registry tags
   ansible.builtin.uri:
-    url: "http://{{ registry_host }}:{{ registry_port }}/v2/{{ registry_test_image }}/tags/list"
+    url: "http://{{ registry_host }}:{{ registry_port }}/v2/{{ registry_test_repo_name }}/tags/list"
     method: GET
     status_code: 200
     return_content: true
   register: registry_tags
+  retries: 3
+  delay: 2
+  until: registry_tags.status == 200
 
-- name: Show tags available
-  ansible.builtin.debug:
-    msg: "Tags per {{ registry_test_image }}: {{ (registry_tags.content | from_json).tags }}"
+- name: Check
+  ansible.builtin.assert:
+    that:
+      - registry_test_tag in (registry_tags.json | default({})).tags | default([])
+    fail_msg: "Tag '{{ registry_test_tag }}' per l'immagine '{{ registry_test_repo_name }}' non trovato!"
+    success_msg: "L'immagine '{{ registry_test_repo_name }}:{{ registry_test_tag }}' è salvata."
 
-# pull dal registry
 - name: Remove Local Images
   community.docker.docker_image:
     name: "{{ item }}"
@@ -62,14 +51,10 @@
     - "{{ registry_test_local_image }}"
     - "{{ registry_test_remote_image }}"
 
-- name: Pull Image
+- name: Pull Image from local registry
   community.docker.docker_image:
     name: "{{ registry_test_remote_image }}"
     source: pull
     force_source: true
-
-- name: Test Complete
-  ansible.builtin.debug:
-    msg: "PUSH and PULL su {{ registry_host }}:{{ registry_port }} FUNZIONANTI"
 
 ...
