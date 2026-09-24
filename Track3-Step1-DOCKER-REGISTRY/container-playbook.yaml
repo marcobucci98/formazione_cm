@@ -1,0 +1,10 @@
+---
+- name: Docker e Docker Registry
+  hosts: worker
+  become: true
+  roles:
+    - install_docker
+    - docker_daemon
+    - docker_registry
+    - pull_and_push
+...

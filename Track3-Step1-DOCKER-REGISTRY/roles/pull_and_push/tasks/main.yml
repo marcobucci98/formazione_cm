@@ -1,0 +1,60 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for pull_and_push
+
+#  pull immagine docker hub 
+- name: Pull hello-world from Docker Hub
+  community.docker.docker_image:
+    name: "{{ registry_test_local_image }}" 
+    source: pull
+    force_source: true
+
+# tag immagine
+- name: Tag image for registry
+  community.docker.docker_image:
+    name: "{{ registry_test_local_image }}"
+    repository: "{{ registry_test_remote_image }}" 
+    source: local
+    force_tag: true
+
+# push su registry 
+- name: Push image to registry
+  community.docker.docker_image:
+    name: "{{ registry_test_remote_image }}"
+    source: local
+    push: true
+
+- name: Query registry tags
+  ansible.builtin.uri:
+    url: "http://{{ registry_host }}:{{ registry_port }}/v2/{{ registry_test_repo_name }}/tags/list"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: registry_tags
+  retries: 3
+  delay: 2
+  until: registry_tags.status == 200
+
+- name: Check
+  ansible.builtin.assert:
+    that:
+      - registry_test_tag in (registry_tags.json | default({})).tags | default([])
+    fail_msg: "Tag '{{ registry_test_tag }}' per l'immagine '{{ registry_test_repo_name }}' non trovato!"
+    success_msg: "L'immagine '{{ registry_test_repo_name }}:{{ registry_test_tag }}' è salvata."
+
+- name: Remove Local Images
+  community.docker.docker_image:
+    name: "{{ item }}"
+    state: absent
+    force_absent: true
+  loop:
+    - "{{ registry_test_local_image }}"
+    - "{{ registry_test_remote_image }}"
+
+- name: Pull Image from local registry
+  community.docker.docker_image:
+    name: "{{ registry_test_remote_image }}"
+    source: pull
+    force_source: true
+
+...
