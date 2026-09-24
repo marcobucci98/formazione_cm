@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: MIT-0
+---
+# tasks file for docker-in-docker-role
+
+- name: Create SSH Keys 
+  community.crypto.openssh_keypair:
+    path: "{{ playbook_dir }}/../Dockerfiles/id_rsa"
+    type: rsa
+    state: present
+  register: ssh_key
+  
+- name: Read Key
+  ansible.builtin.slurp:
+    src: "{{ playbook_dir }}/../Dockerfiles/id_rsa.pub"
+  register: key_encoded
+
+- name: Set Key
+  ansible.builtin.set_fact:
+    key_cont: "{{ key_encoded.content | b64decode }}" 
+
+- name: Build Ubuntu Image
+  community.docker.docker_image:
+    name: ubuntu-docker-in-docker
+    build:
+      path: ../Dockerfiles
+      dockerfile: Dockerfile.docker-in-docker
+      args:
+        SSH_PUBLIC_KEY: "{{ key_cont }}"
+      pull: true
+    source: build
+
+- name: Start Docker
+  community.docker.docker_container:
+    name: node-docker-in-docker
+    image: ubuntu-docker-in-docker 
+    state: started
+    restart_policy: always
+    privileged: true  
+    ulimits:
+          - "nofile:262144:262144"
+    ports:
+      - "2223:22"
+
+...
