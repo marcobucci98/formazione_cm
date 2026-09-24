@@ -2,7 +2,4 @@
 ---
 # defaults file for install_docker
 
-# utenti
-docker_user: vagrant
-
 ...
