@@ -1,0 +1,10 @@
+---
+- name: Build tramite Podman
+  containers.podman.podman_image:
+    name: "{{ container_imm }}"
+    path: "./Dockerfiles-OS"         
+    dockerfile: "{{ dockerfile | default('Dockerfile') }}" 
+    build:
+      cache: true
+      extra_args: "--no-cache"     
+    state: build

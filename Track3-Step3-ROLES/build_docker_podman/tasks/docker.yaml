@@ -1,0 +1,11 @@
+---
+- name: Build tramite Docker
+  community.docker.docker_image:
+    name: "{{ container_imm }}"
+    build:
+      path: "{{ playbook_dir }}/Dockerfiles-OS/ubuntu-OS"          
+      dockerfile: "{{ dockerfile | default('Dockerfile') }}"
+      pull: true  
+    source: build
+    state: present
+...

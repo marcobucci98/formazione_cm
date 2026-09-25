@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: MIT-0
+---
+# tasks file for build_docker_podman
+
+- name: Check for Podman
+  ansible.builtin.command: type podman
+  register: podman_check
+  ignore_errors: true
+  changed_when: false
+  failed_when: false   
+  when: engine_auto == "auto"
+
+- name: Select Engine
+  ansible.builtin.set_fact:
+    my_engine: >-
+      {{
+        'podman' if (engine_auto == 'auto' and podman_check.rc | default(1) == 0)
+        else (engine_auto if engine_auto != 'auto' else 'docker')
+      }}
+
+- name: Print Engine
+  ansible.builtin.debug:
+    msg: "Utilizzo dell'engine: {{ my_engine }}"
+
+- name: Task for {{ my_engine }}
+  ansible.builtin.include_tasks: "{{ my_engine }}.yaml"
+...

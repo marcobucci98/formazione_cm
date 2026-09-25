@@ -1,0 +1,11 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for build_docker_podman
+
+engine_auto: "auto"
+
+# Configurazione del container
+container_imm: "ubuntu:1.0"
+dockerfile: Dockerfile.ubuntu22
+
+...

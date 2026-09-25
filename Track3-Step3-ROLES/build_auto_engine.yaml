@@ -1,0 +1,5 @@
+---
+- hosts: worker
+  gather_facts: false
+  roles:
+    - role: build_docker_podman
