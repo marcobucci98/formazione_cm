@@ -19,7 +19,6 @@ def buildAndPushTag(Map args) {
             ls -la
             echo "Ricerca ricorsiva del Dockerfile:"
             find . -name "${config.dockerfileName}"
-            echo "=== FINE DEBUG ==="
         """
 
         def dockerfileFile = "${config.dockerfileDir}/${config.dockerfileName}"
