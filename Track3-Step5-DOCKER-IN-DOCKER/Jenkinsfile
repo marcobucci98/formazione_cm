@@ -2,7 +2,7 @@
 def buildAndPushTag(Map args) {
     def defaults = [
         registryUrl: 'http://192.168.56.11:5000', 
-        dockerfileDir: 'Dockerfiles-OS',
+        dockerfileDir: 'Track3-Step5-DOCKER-IN-DOCKER/Dockerfiles-OS',
         dockerfileName: 'Dockerfile.docker-in-docker',
         buildArgs: '',
         pushLatest: false
