@@ -2,16 +2,26 @@
 def buildAndPushTag(Map args) {
     def defaults = [
         registryUrl: 'http://192.168.56.11:5000', 
-        dockerfileDir: './Dockerfiles-OS',
+        dockerfileDir: 'Dockerfiles-OS',
         dockerfileName: 'Dockerfile.docker-in-docker',
         buildArgs: '',
         pushLatest: false
     ]
     def config = defaults + args
 
-    
     docker.withRegistry(config.registryUrl) {
-      
+        sh """
+            echo "=== INIZIO DEBUG ==="
+            echo "Utente corrente: \$(whoami)"
+            echo "Directory corrente (pwd): \$(pwd)"
+            echo "Variabile WORKSPACE: ${env.WORKSPACE}"
+            echo "Contenuto della directory corrente:"
+            ls -la
+            echo "Ricerca ricorsiva del Dockerfile:"
+            find . -name "${config.dockerfileName}"
+            echo "=== FINE DEBUG ==="
+        """
+
         def dockerfileFile = "${config.dockerfileDir}/${config.dockerfileName}"
         def image = docker.build("${config.image}:${config.buildTag}", "${config.buildArgs} -f ${dockerfileFile} ${config.dockerfileDir}") 
         image.push()
@@ -41,12 +51,12 @@ pipeline {
             }
         }
         
-        stage('Tag Logic') {
+        stage('Tag') {
             steps {
                 script {
-                        env.DOCKER_TAG = "build-${env.BUILD_NUMBER}"
-                    }
+                    env.DOCKER_TAG = "build-${env.BUILD_NUMBER}"
                 }
+            }
         }
         
         stage('Build and Push docker image') {
