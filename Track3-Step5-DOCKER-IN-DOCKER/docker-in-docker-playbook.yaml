@@ -1,0 +1,6 @@
+---
+- hosts: worker
+  gather_facts: false
+  roles:
+    - role: docker-in-docker-role
+...
