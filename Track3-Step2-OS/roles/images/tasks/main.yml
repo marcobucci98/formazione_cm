@@ -28,7 +28,7 @@
 
 - name: Set Key
   ansible.builtin.set_fact:
-    pub_key_content: "{{ pub_key_encoded.content | b64decode }}"
+    pub_key: "{{ pub_key_encoded.content | b64decode }}"
 
 # Build immagine Ubuntu
 
@@ -40,7 +40,7 @@
       path: "{{ playbook_dir }}/Dockerfiles-OS/ubuntu-OS"
       dockerfile: "{{ dockerfile_ubuntu }}"
       args:
-        SSH_PUBLIC_KEY: "{{ pub_key_content }}"
+        SSH_PUBLIC_KEY: "{{ pub_key }}"
       pull: true
     source: build
 
@@ -65,7 +65,7 @@
       path: "{{ playbook_dir }}/Dockerfiles-OS/rocky-OS"
       dockerfile: "{{ dockerfile_rocky }}"
       args:
-        SSH_PUBLIC_KEY: "{{ pub_key_content }}"
+        SSH_PUBLIC_KEY: "{{ pub_key }}"
       pull: true
     source: build
 
